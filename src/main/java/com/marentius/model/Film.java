@@ -1,29 +1,25 @@
 package com.marentius.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDate;
 
-public class Movie extends Production {
+public class Film extends Produksjon{
 
-    // Constructor with title, runtime, and description
-    public Movie(String title, int runtime, String description, LocalDate releaseDate) {
-        super(title, runtime, description);
-        this.setUtgivelsesdato(releaseDate);
+    public Film(String tittel, int spilletid, String beskrivelse, LocalDate utgivelsesdato) {
+        super(tittel,spilletid, beskrivelse);
     }
 
-    // Constructor with title, runtime, and image URL
-    public Movie(String title, int runtime, String imageUrl) {
-        super(title, runtime, imageUrl);
+    public Film(String tittel, int spilletid, String bildeUrl) {
+        super(tittel,spilletid, bildeUrl);
     }
 
-    // Default constructor
-    public Movie() {
+    public Film() {
     }
 
-    // toString method
-    @Override
-    @JsonIgnore
+    @Override    @JsonIgnore
     public String toString() {
-        return "Title: " + super.getTitle() + " Release Date: " + super.getUtgivelsesdato();
+        return "Tittel: " +  super.getTittel() + " Utgivelsesdato: " + super.getUtgivelsesdato();
     }
+
 }

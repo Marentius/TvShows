@@ -2,54 +2,46 @@ package com.marentius.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class Role {
-    private String roleFirstName;
-    private String roleLastName;
-    private Person actor;
+public class Rolle{
+    private String rolleFornavn, rolleEtternavn;
+    private Person skuespiller;
 
-    // Constructor with parameters
-    public Role(String roleFirstName, String roleLastName, Person actor) {
-        this.roleFirstName = roleFirstName;
-        this.roleLastName = roleLastName;
-        this.actor = actor;
+    public Rolle(String rolleFornavn, String rolleEtternavn, Person skuespiller) {
+        this.rolleFornavn = rolleFornavn;
+        this.rolleEtternavn = rolleEtternavn;
+        this.skuespiller = skuespiller;
     }
 
-    // Default constructor
-    public Role() {
+    public Rolle() {
     }
-
-    // Getters and Setters
     @JsonIgnore
-    public String getRoleFirstName() {
-        return roleFirstName;
+    public String getRolleFornavn() {
+        return rolleFornavn;
     }
 
-    public void setRoleFirstName(String roleFirstName) {
-        this.roleFirstName = roleFirstName;
+    public void setRolleFornavn(String rolleFornavn) {
+        this.rolleFornavn = rolleFornavn;
     }
-
     @JsonIgnore
-    public String getRoleLastName() {
-        return roleLastName;
+    public String getRolleEtternavn() {
+        return rolleEtternavn;
     }
 
-    public void setRoleLastName(String roleLastName) {
-        this.roleLastName = roleLastName;
+    public void setRolleEtternavn(String rolleEtternavn) {
+        this.rolleEtternavn = rolleEtternavn;
     }
-
     @JsonIgnore
-    public Person getActor() {
-        return actor;
+    public Person getSkuespiller() {
+        return skuespiller;
     }
 
-    public void setActor(Person actor) {
-        this.actor = actor;
+    public void setSkuespiller(Person skuespiller) {
+        this.skuespiller = skuespiller;
     }
 
-    // toString method
-    @Override
-    @JsonIgnore
+    @Override     @JsonIgnore
     public String toString() {
-        return "Role: " + roleFirstName + " " + roleLastName + " played by " + actor;
+        return "Rolle: " + rolleFornavn + " " + rolleEtternavn + " " + skuespiller;
     }
+
 }

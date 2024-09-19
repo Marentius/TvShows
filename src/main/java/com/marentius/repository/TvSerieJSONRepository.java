@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.marentius.model.Episode;
-import com.marentius.model.TVShow;
+import com.marentius.model.TVSerie;
 import com.marentius.thread.WriteToFileThread;
 
 import java.io.*;
@@ -12,40 +12,48 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class TvShowJSONRepository implements TvShowRepository {
+public class TvSerieJSONRepository implements TvSerieRepository {
 
-    private ArrayList<TVShow> tvShowList = new ArrayList<>();
+    private ArrayList<TVSerie> tvSerieArrayList = new ArrayList<>();
 
-    public TvShowJSONRepository(String filename) {
+    public TvSerieJSONRepository(String filename) {
         readFromJsonFile(filename);
         readAndWrite(filename);
     }
 
     @JsonIgnore
-    public ArrayList<TVShow> readFromJsonFile(String filename) {
+    public ArrayList<TVSerie> readFromJsonFile(String filename) {
+
         ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
         try {
-            TVShow[] tvShowArray = objectMapper.readValue(new File(filename), TVShow[].class);
-            tvShowList.addAll(Arrays.asList(tvShowArray));
+            TVSerie[] tvSeriesArray = objectMapper.readValue(new File(filename), TVSerie[].class);
+
+            tvSerieArrayList.addAll(Arrays.asList(tvSeriesArray));
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return tvShowList;
+        return tvSerieArrayList;
     }
 
     @Override
     @JsonIgnore
-    public ArrayList<TVShow> getTvShows() {
-        return new ArrayList<>(tvShowList);
+    public ArrayList<TVSerie> getTvSerier() {
+        ArrayList<TVSerie> tv = new ArrayList<>();
+
+        for (TVSerie tvSerie : tvSerieArrayList) {
+            tv.add(tvSerie);
+        }
+        return tv;
     }
 
     @Override
     @JsonIgnore
-    public TVShow getTvShow(String tvShowName) {
-        for (TVShow tvShow : tvShowList) {
-            if (tvShow.getTittel().equals(tvShowName)) {
-                return tvShow;
+    public TVSerie getEnTvSerie(String tvSerieNavn) {
+        for (TVSerie tvSerie : tvSerieArrayList) {
+            if (tvSerie.getTittel().equals(tvSerieNavn)) {
+                return tvSerie;
             }
         }
         return null;
@@ -53,20 +61,19 @@ public class TvShowJSONRepository implements TvShowRepository {
 
     @Override
     @JsonIgnore
-    public ArrayList<Episode> getEpisodesInSeason(String tvShowName, int seasonNumber) {
+    public ArrayList<Episode> getEpisoderiSesong(String tvSerieNavn, int sesongNr) {
         ArrayList<Episode> episodes = new ArrayList<>();
-        TVShow tvShow = null;
+        TVSerie tvSerie = null;
 
-        for (TVShow show : tvShowList) {
-            if (show.getTittel().equals(tvShowName)) {
-                tvShow = show;
-                break;
+        for (TVSerie serie : tvSerieArrayList) {
+            if (serie.getTittel().equals(tvSerieNavn)) {
+                tvSerie = serie;
             }
         }
 
-        if (tvShow != null) {
-            for (Episode episode : tvShow.getEpisoder()) {
-                if (episode.getSesongnummer() == seasonNumber) {
+        if (tvSerie != null) {
+            for (Episode episode : tvSerie.getEpisoder()) {
+                if (episode.getSesongNummer() == sesongNr) {
                     episodes.add(episode);
                 }
             }
@@ -76,11 +83,11 @@ public class TvShowJSONRepository implements TvShowRepository {
 
     @Override
     @JsonIgnore
-    public Episode getEpisode(String tvShowName, int seasonNumber, int episodeNumber) {
-        for (TVShow show : tvShowList) {
-            if (show.getTittel().equals(tvShowName)) {
-                for (Episode episode : show.getEpisoder()) {
-                    if (episode.getSesongnummer() == seasonNumber && episode.getEpisodenummer() == episodeNumber) {
+    public Episode getEpisode(String tvSerieNavn, int sesongNr, int episodeNr) {
+        for (TVSerie serie : tvSerieArrayList) {
+            if (serie.getTittel().equals(tvSerieNavn)) {
+                for (Episode episode : serie.getEpisoder()) {
+                    if (episode.getSesongNummer() == sesongNr && episode.getEpisodeNummer() == episodeNr) {
                         return episode;
                     }
                 }
@@ -89,28 +96,63 @@ public class TvShowJSONRepository implements TvShowRepository {
         return null;
     }
 
-    @Override
-    public Episode updateEpisode(String tvShowName, String episodeTitle, String episodeDescription, int episodeNumber, int seasonNumber, int runtime, LocalDate releaseDate, String imageUrl) {
-        ArrayList<TVShow> updatedList = getTvShows();
 
-        for (TVShow show : updatedList) {
-            if (show.getTittel().equals(tvShowName)) {
-                ArrayList<Episode> episodes = show.getEpisoder();
+    @Override
+    public Episode oppdaterEpisode(String tvSerieNavn, String episodeTittel, String episodeBeskrivelse, int episodeNummer, int sesongNummer, int spilletid, LocalDate utgivelsesdato, String bildeUrl) {
+        ArrayList<TVSerie> oppdatertListe = getTvSerier();
+
+        for (TVSerie serie : oppdatertListe) {
+            if (serie.getTittel().equals(tvSerieNavn)) {
+
+                ArrayList<Episode> episodes = serie.getEpisoder();
 
                 for (Episode episode : episodes) {
-                    if (episode.getSesongnummer() == seasonNumber && episode.getEpisodenummer() == episodeNumber) {
-                        episode.setTitle(episodeTitle);
-                        episode.setBeskrivelse(episodeDescription);
-                        episode.setEpisodenummer(episodeNumber);
-                        episode.setSesongnummer(seasonNumber);
-                        episode.setSpilletid(runtime);
-                        episode.setUtgivelsesdato(releaseDate);
-                        episode.setBildeUrl(imageUrl);
+                    if (episode.getSesongNummer() == sesongNummer && episode.getEpisodeNummer() == episodeNummer) {
 
-                        show.setEpisoder(episodes);
+                        episode.setTittel(episodeTittel);
+                        episode.setBeskrivelse(episodeBeskrivelse);
+                        episode.setEpisodeNummer(episodeNummer);
+                        episode.setSesongNummer(sesongNummer);
+                        episode.setSpilletid(spilletid);
+                        episode.setUtgivelsesdato(utgivelsesdato);
+                        episode.setBildeUrl(bildeUrl);
 
-                        WriteToFileThread thread = new WriteToFileThread(updatedList, new File("updated.json"));
+                        serie.setEpisoder(episodes);
+
+                        //writeToFile(oppdatertListe, new File("updated.json"));
+                        //Jeg oppretter nye json. filer bare for å vise at filene blir oppdatert uten å endre den eksisterende tvshows_10 filen
+                        WriteToFileThread thread = new WriteToFileThread(oppdatertListe, new File("updated.json"));
                         thread.start();
+
+
+                        return episode;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+
+    @Override
+    public Episode slettEpisode(String tvSerieNavn, int sesongNr, int episodeNr) {
+        ArrayList<TVSerie> oppdatertListe = getTvSerier();
+
+        for (TVSerie serie : oppdatertListe) {
+            if (serie.getTittel().equals(tvSerieNavn)) {
+
+                ArrayList<Episode> episoder = serie.getEpisoder();
+
+                for (Episode episode : episoder) {
+                    if (episode.getSesongNummer() == sesongNr && episode.getEpisodeNummer() == episodeNr) {
+                        episoder.remove(episode);
+                        serie.setEpisoder(episoder);
+
+                        //writeToFile(oppdatertListe, new File("deleted.json"));
+                        //Jeg oppretter nye json. filer bare for å vise at filene blir oppdatert uten å endre den eksisterende tvshows_10 filen
+                        WriteToFileThread thread = new WriteToFileThread(oppdatertListe, new File("deleted.json"));
+                        thread.start();
+
 
                         return episode;
                     }
@@ -121,40 +163,20 @@ public class TvShowJSONRepository implements TvShowRepository {
     }
 
     @Override
-    public Episode deleteEpisode(String tvShowName, int seasonNumber, int episodeNumber) {
-        ArrayList<TVShow> updatedList = getTvShows();
+    public Episode opprettEpiode(String tvSerieNavn, String episodeTittel,String beskrivelse, int episodeNr, int sesongNr, int spilletid, LocalDate utgivelsesdato, String bildeURL) {
+        ArrayList<TVSerie> oppdatertListe = tvSerieArrayList;
 
-        for (TVShow show : updatedList) {
-            if (show.getTittel().equals(tvShowName)) {
-                ArrayList<Episode> episodes = show.getEpisoder();
+        for (TVSerie serie : oppdatertListe) {
 
-                for (Episode episode : episodes) {
-                    if (episode.getSesongnummer() == seasonNumber && episode.getEpisodenummer() == episodeNumber) {
-                        episodes.remove(episode);
-                        show.setEpisoder(episodes);
+            if (serie.getTittel().equals(tvSerieNavn)) {
 
-                        WriteToFileThread thread = new WriteToFileThread(updatedList, new File("deleted.json"));
-                        thread.start();
+                Episode episode = new Episode(episodeTittel, spilletid, beskrivelse, utgivelsesdato, bildeURL, episodeNr, sesongNr);
 
-                        return episode;
-                    }
-                }
-            }
-        }
-        return null;
-    }
+                serie.leggTilEpisode(episode);
 
-    @Override
-    public Episode createEpisode(String tvShowName, String episodeTitle, String description, int episodeNumber, int seasonNumber, int runtime, LocalDate releaseDate, String imageUrl) {
-        ArrayList<TVShow> updatedList = tvShowList;
-
-        for (TVShow show : updatedList) {
-            if (show.getTittel().equals(tvShowName)) {
-                Episode episode = new Episode(episodeTitle, runtime, description, releaseDate, imageUrl, episodeNumber, seasonNumber);
-
-                show.addEpisode(episode);
-
-                WriteToFileThread thread = new WriteToFileThread(updatedList, new File("created.json"));
+                //writeToFile(oppdatertListe, new File("created.json"));
+                //Jeg oppretter nye json. filer bare for å vise at filene blir oppdatert uten å endre den eksisterende tvshows_10 filen
+                WriteToFileThread thread = new WriteToFileThread(oppdatertListe, new File("created.json"));
                 thread.start();
 
                 return episode;
@@ -163,29 +185,36 @@ public class TvShowJSONRepository implements TvShowRepository {
         return null;
     }
 
-    public void writeToFile(ArrayList<TVShow> shows, File file) {
+
+    public void writeToFile(ArrayList<TVSerie> series, File file) {
         ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         try {
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, shows);
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, series);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+
+    } //metodelogikk flyttet til WriteToFileThread
 
     public void readAndWrite(String filename) {
-        ArrayList<TVShow> backup = new ArrayList<>();
+        ArrayList<TVSerie> backUp = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
         try {
-            TVShow[] tvShowArray = objectMapper.readValue(new File(filename), TVShow[].class);
+            TVSerie[] tvSeriesArray = objectMapper.readValue(new File(filename), TVSerie[].class);
 
-            backup.addAll(Arrays.asList(tvShowArray));
+            backUp.addAll(Arrays.asList(tvSeriesArray));
 
-            WriteToFileThread thread = new WriteToFileThread(backup, new File("backup.json"));
+            //objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File("backup.json"), backUp);
+            //Jeg oppretter nye json. filer bare for å vise at filene blir oppdatert uten å endre den eksisterende tvshows_10 filen
+            WriteToFileThread thread = new WriteToFileThread(backUp, new File("backup.json"));
             thread.start();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
+
 }

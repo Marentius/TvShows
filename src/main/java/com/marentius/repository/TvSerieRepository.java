@@ -1,31 +1,24 @@
 package com.marentius.repository;
 
 import com.marentius.model.Episode;
-import com.marentius.model.TVShow;
+import com.marentius.model.TVSerie;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-public interface TvShowRepository {
+public interface TvSerieRepository {
 
-    // Get all TV shows
-    ArrayList<TVShow> getTvShows();
+    ArrayList<TVSerie> getTvSerier();
 
-    // Get a specific TV show by name
-    TVShow getTvShow(String tvShowName);
+    TVSerie getEnTvSerie(String tvSerieNavn);
 
-    // Get all episodes of a specific season of a TV show
-    ArrayList<Episode> getEpisodesInSeason(String tvShowName, int seasonNumber);
+    ArrayList<Episode> getEpisoderiSesong(String tvSerieNavn, int sesongNr);
 
-    // Get a specific episode by its number and season in a TV show
-    Episode getEpisode(String tvShowName, int seasonNumber, int episodeNumber);
+    Episode getEpisode(String tvSerieNavn, int sesongNr, int episodeNr);
 
-    // Update an episode in a TV show
-    Episode updateEpisode(String tvShowName, String episodeTitle, String episodeDescription, int episodeNumber, int seasonNumber, int runtime, LocalDate releaseDate, String imageUrl);
+    Episode oppdaterEpisode(String tvSerieNavn, String episodeTittel, String episodeBeskrivelse, int episodeNummer, int sesongNummer, int spilletid, LocalDate utgivelsesdato, String bildeUrl);
 
-    // Delete an episode in a TV show
-    Episode deleteEpisode(String tvShowName, int seasonNumber, int episodeNumber);
+    Episode slettEpisode(String tvSerieNavn, int sesongNr, int episodeNr);
 
-    // Create a new episode in a TV show
-    Episode createEpisode(String tvShowName, String episodeTitle, String description, int episodeNumber, int seasonNumber, int runtime, LocalDate releaseDate, String imageUrl);
+    Episode opprettEpiode(String tvSerieNavn, String episodeTittel, String beskrivelse, int episodeNr, int sesongNr, int spilletid, LocalDate utgivelsesdato, String bildeURL);
 }

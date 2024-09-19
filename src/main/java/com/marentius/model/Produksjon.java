@@ -2,43 +2,56 @@ package com.marentius.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-public abstract class Production {
-    private String title;
+public abstract class Produksjon {
     private String beskrivelse;
     private LocalDate utgivelsesdato;
+    private String tittel;
     private int spilletid;
     private Person regissor;
-    private ArrayList<Role> rolleliste = new ArrayList<>();
+    private ArrayList<Rolle> roller = new ArrayList<>();
     private String bildeUrl;
 
-    // Constructors
-    public Production(String title, int duration, String bildeUrl) {
-        this.title = title;
-        this.spilletid = duration;
+
+    public Produksjon(String tittel, int spilletid, String bildeUrl) {
+        this.tittel = tittel;
+        this.spilletid = spilletid;
         this.bildeUrl = bildeUrl;
     }
 
-    public Production(String title, int duration, String description, LocalDate releaseDate, String bildeUrl) {
-        this.title = title;
-        this.spilletid = duration;
-        this.beskrivelse = description;
-        this.utgivelsesdato = releaseDate;
+    public Produksjon(String tittel, int spilletid, String beskrivelse, LocalDate utgivelsesdato, String bildeUrl) {
+        this.tittel = tittel;
+        this.spilletid = spilletid;
+        this.beskrivelse = beskrivelse;
+        this.utgivelsesdato = utgivelsesdato;
         this.bildeUrl = bildeUrl;
     }
 
-    public Production() {
+    public Produksjon() {
+
     }
 
-    // Getters and Setters
-    public String getTitle() {
-        return title;
+    public String getBildeUrl() {
+        return bildeUrl;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public String getTittel() {
+        return tittel;
+    }
+
+    public void setTittel(String tittel) {
+        this.tittel = tittel;
+    }
+
+    public int getSpilletid() {
+        return spilletid;
+    }
+
+    public void setSpilletid(int spilletid) {
+        this.spilletid = spilletid;
     }
 
     public String getBeskrivelse() {
@@ -57,14 +70,6 @@ public abstract class Production {
         this.utgivelsesdato = utgivelsesdato;
     }
 
-    public int getSpilletid() {
-        return spilletid;
-    }
-
-    public void setSpilletid(int spilletid) {
-        this.spilletid = spilletid;
-    }
-
     public Person getRegissor() {
         return regissor;
     }
@@ -73,36 +78,29 @@ public abstract class Production {
         this.regissor = regissor;
     }
 
-    @JsonProperty("roleList")
-    public ArrayList<Role> getRolleliste() {
-        return rolleliste;
+    @JsonProperty("rolleListe")
+    public ArrayList<Rolle> getRoller() {
+        return roller;
     }
 
-    public void setRolleliste(ArrayList<Role> rolleliste) {
-        this.rolleliste = rolleliste;
-    }
-
-    public String getBildeUrl() {
-        return bildeUrl;
+    public void setRoller(ArrayList<Rolle> roller) {
+        this.roller = roller;
     }
 
     public void setBildeUrl(String bildeUrl) {
         this.bildeUrl = bildeUrl;
     }
 
-    // Add a single role
-    public void addRole(Role role) {
-        rolleliste.add(role);
+    public void leggTilEnRolle(Rolle enRolle) {
+        roller.add(enRolle);
     }
 
-    // Add multiple roles
-    public void addRoles(ArrayList<Role> multipleRoles) {
-        rolleliste.addAll(multipleRoles);
+    public void leggTilMangeRoller(ArrayList<Rolle> flereRoller) {
+        roller.addAll(flereRoller);
     }
 
-    @Override
-    @JsonIgnore
+    @Override     @JsonIgnore
     public String toString() {
-        return title + " is directed by " + regissor;
+        return tittel + " er ressigert av " + regissor;
     }
 }

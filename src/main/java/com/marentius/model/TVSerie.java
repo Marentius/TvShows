@@ -1,22 +1,23 @@
 package com.marentius.model;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class TVShow {
+public class TVSerie{
     private String tittel;
     private String beskrivelse;
     private LocalDate utgivelsesdato;
     private ArrayList<Episode> episoder;
-    private double averageRuntime;
-    private int numberOfSeasons;
+    private double gjennomsnittligSpilletid;
+    private int antallSesonger;
     private String bildeUrl;
 
-    // Constructor
-    public TVShow(String tittel, String beskrivelse, LocalDate utgivelsesdato, ArrayList<Episode> episoder, String bildeUrl) {
+
+    public TVSerie(String tittel, String beskrivelse, LocalDate utgivelsesdato, ArrayList<Episode> episoder, String bildeUrl) {
         this.tittel = tittel;
         this.beskrivelse = beskrivelse;
         this.utgivelsesdato = utgivelsesdato;
@@ -24,11 +25,33 @@ public class TVShow {
         this.bildeUrl = bildeUrl;
     }
 
-    // Default constructor
-    public TVShow() {
+    public TVSerie(){
     }
 
-    // Getters and Setters
+    public void setGjennomsnittligSpilletid(double gjennomsnittligSpilletid) {
+        this.gjennomsnittligSpilletid = gjennomsnittligSpilletid;
+    }
+
+    public void setAntallSesonger(int antallSesonger) {
+        this.antallSesonger = antallSesonger;
+    }
+
+    public void setBildeUrl(String bildeUrl) {
+        this.bildeUrl = bildeUrl;
+    }
+
+    public String getBildeUrl() {
+        return bildeUrl;
+    }
+
+    public int getAntallSesonger() {
+        return antallSesonger;
+    }
+    @JsonIgnore
+    public double getGjennomsnittligSpilletid() {
+        return gjennomsnittligSpilletid;
+    }
+
     public String getTittel() {
         return tittel;
     }
@@ -61,115 +84,87 @@ public class TVShow {
         this.episoder = episoder;
     }
 
-    public String getBildeUrl() {
-        return bildeUrl;
-    }
-
-    public void setBildeUrl(String bildeUrl) {
-        this.bildeUrl = bildeUrl;
-    }
-
-    @JsonIgnore
-    public double getAverageRuntime() {
-        return averageRuntime;
-    }
-
-    public void setAverageRuntime(double averageRuntime) {
-        this.averageRuntime = averageRuntime;
-    }
-
-    public int getNumberOfSeasons() {
-        return numberOfSeasons;
-    }
-
-    public void setNumberOfSeasons(int numberOfSeasons) {
-        this.numberOfSeasons = numberOfSeasons;
-    }
-
-    // Add a single episode
-    public void addEpisode(Episode episode) {
-        int seasons = 0;
-        for (Episode e : episoder) {
-            if (e.getSesongnummer() > seasons) {
-                seasons++;
+    public void leggTilEpisode(Episode episoden) {
+        int sesonger = 0;
+        for (Episode k: episoder) {
+            if (k.getSesongNummer() > sesonger) {
+                sesonger++;
             }
         }
-        if (episode.getSesongnummer() <= seasons + 1) {
-            episoder.add(episode);
-            updateAverageRuntime();
-        } else {
-            System.out.println("This episode cannot be added");
+        if (episoden.getSesongNummer() <= sesonger + 1) {
+            episoder.add(episoden);
+            oppdaterGjennomsnittligSpilletid();
         }
-        for (Episode e : episoder) {
-            if (e.getSesongnummer() > numberOfSeasons) {
-                numberOfSeasons++;
+        else {
+            System.out.println("Denne episoden kan ikke legges til");
+        }
+        for (Episode s: episoder) {
+            if (s.getSesongNummer() > antallSesonger){
+                antallSesonger++;
             }
+
         }
     }
 
-    // Update the average runtime based on the episodes
-    private void updateAverageRuntime() {
-        int totalRuntime = 0;
-        int totalEpisodes = episoder.size();
-        for (Episode e : episoder) {
-            totalRuntime += e.getSpilletid();
-        }
-        this.averageRuntime = (double) totalRuntime / totalEpisodes;
+    @Override     @JsonIgnore
+    public String toString() {
+        return "TVSerie: " + tittel + " (" + utgivelsesdato + ") \n";
     }
-
-    // Fetch episodes from a specific season
     @JsonIgnore
-    public ArrayList<Episode> getEpisodesInSeason(int season) {
-        ArrayList<Episode> seasonEpisodes = new ArrayList<>();
+    public ArrayList<Episode> hentEpisoderISesong(int sesong) {
+        ArrayList<Episode> e = new ArrayList<>();
+
         for (Episode ep : episoder) {
-            if (ep.getSesongnummer() == season) {
-                seasonEpisodes.add(ep);
+            if (ep.getSesongNummer() == sesong) {
+                e.add(ep);
             }
+
         }
-        return seasonEpisodes;
+        return e;
+    }
+    @JsonIgnore
+    public static int tilfeldigSpilletid(int min, int max) {
+        Random tilfedigSpilletid = new Random();
+        return tilfedigSpilletid.nextInt(min, max);
     }
 
-    // Add multiple seasons and episodes
-    public void addSeasonsAndEpisodes(int seasons, int episodesPerSeason) {
-        for (int i = 1; i <= seasons; i++) {
-            for (int k = 1; k <= episodesPerSeason; k++) {
+    public void leggTilSesongerOgEpisoder(int ses, int epi) {
+        for (var i = 1; (i - 1) < ses; i++) {
+            for (var k = 1; (k - 1) < epi; k++) {
                 boolean episodeExists = false;
                 for (Episode e : episoder) {
-                    if (e.getSesongnummer() == i && e.getEpisodenummer() == k) {
+                    if (e.getSesongNummer() == i && e.getEpisodeNummer() == k) {
                         episodeExists = true;
                         break;
                     }
                 }
                 if (!episodeExists) {
-                    episoder.add(new Episode("Episode " + k, k, i, randomRuntime(20, 30), ""));
+                    episoder.add(new Episode("Episode " + k, k, i, tilfeldigSpilletid(20,30),""));
                 }
             }
         }
-        updateAverageRuntime();
+        oppdaterGjennomsnittligSpilletid();
     }
 
-    // Generate random runtime
-    @JsonIgnore
-    public static int randomRuntime(int min, int max) {
-        Random random = new Random();
-        return random.nextInt(min, max);
-    }
 
-    // Fetch the cast of the entire TV show
-    @JsonIgnore
-    public ArrayList<Role> getCast() {
-        ArrayList<Role> castList = new ArrayList<>();
-        for (Episode e : episoder) {
-            ArrayList<Role> roles = e.getRolleliste();
-            castList.addAll(roles);
+    private void oppdaterGjennomsnittligSpilletid() {
+        int totalSpilletid = 0;
+        int totalEpisoder = episoder.size();
+        for (Episode e: episoder) {
+            totalSpilletid += e.getSpilletid();
         }
-        return castList;
+        this.gjennomsnittligSpilletid = (double) totalSpilletid / totalEpisoder;
+    }
+    @JsonIgnore
+    public ArrayList<Rolle> hentRollebesetning() {
+        ArrayList<Rolle> rolleliste = new ArrayList<>();
+
+        for (Episode e: episoder) {
+            ArrayList<Rolle> roller = e.getRoller();
+            rolleliste.addAll(roller);
+        }
+        return rolleliste;
     }
 
-    // toString method
-    @Override
-    @JsonIgnore
-    public String toString() {
-        return "TV Show: " + tittel + " (" + utgivelsesdato + ") \n";
-    }
+
 }
