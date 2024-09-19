@@ -33,7 +33,6 @@ public class EpisodeController {
         context.json(episodes);
     }
 
-
     public void getEpisode(Context context) {
         String tvSerieNavn = context.pathParam("tvserie-id");
         int sesongNummer = Integer.parseInt(context.pathParam("sesong-nr"));
@@ -45,28 +44,38 @@ public class EpisodeController {
     }
 
     public void slettEpisode(Context context) {
-        String tvSerieNavn = context.pathParam("tvserie-id");
+        String tvSerieId = context.pathParam("tvserie-id");
         int sesongNummer = Integer.parseInt(context.pathParam("sesong-nr"));
         int episodeNummer = Integer.parseInt(context.pathParam("episode-nr"));
 
-        Episode episode = tvSerieRepository.slettEpisode(tvSerieNavn, sesongNummer, episodeNummer);
+        // Logg data for å feilsøke
+        System.out.println(
+                "Sletter episode " + episodeNummer + " i sesong " + sesongNummer + " for TV-serie " + tvSerieId);
 
-        context.redirect("/tvserie/"+tvSerieNavn+"/sesong/"+sesongNummer);
+        Episode episode = tvSerieRepository.slettEpisode(tvSerieId, sesongNummer, episodeNummer);
+
+        if (episode != null) {
+            context.status(200); // Hvis slettingen lykkes, send status 200 OK
+        } else {
+            context.status(404); // Hvis episoden ikke ble funnet, returner 404 Not Found
+        }
     }
-
 
     public void opprettEpisode(Context context) {
         String[] parametere = hentEpisodeParametere(context);
-        tvSerieRepository.opprettEpiode(parametere[0], parametere[1], parametere[2], Integer.parseInt(parametere[3]), Integer.parseInt(parametere[4]), Integer.parseInt(parametere[5]), LocalDate.parse(parametere[6]), parametere[7]);
+        tvSerieRepository.opprettEpiode(parametere[0], parametere[1], parametere[2], Integer.parseInt(parametere[3]),
+                Integer.parseInt(parametere[4]), Integer.parseInt(parametere[5]), LocalDate.parse(parametere[6]),
+                parametere[7]);
         context.redirect("/tvserie/" + parametere[0] + "/sesong/" + parametere[4]);
     }
 
     public void oppdaterEpisode(Context context) {
         String[] parametere = hentEpisodeParametere(context);
-        tvSerieRepository.oppdaterEpisode(parametere[0], parametere[1], parametere[2], Integer.parseInt(parametere[3]), Integer.parseInt(parametere[4]), Integer.parseInt(parametere[5]), LocalDate.parse(parametere[6]), parametere[7]);
+        tvSerieRepository.oppdaterEpisode(parametere[0], parametere[1], parametere[2], Integer.parseInt(parametere[3]),
+                Integer.parseInt(parametere[4]), Integer.parseInt(parametere[5]), LocalDate.parse(parametere[6]),
+                parametere[7]);
         context.redirect("/tvserie/" + parametere[0] + "/sesong/" + parametere[4] + "/episode/" + parametere[3]);
     }
-
 
     private String[] hentEpisodeParametere(Context context) {
         String tvSerieNavn = context.pathParam("tvserie-id");
@@ -78,7 +87,8 @@ public class EpisodeController {
         String utgivelsesdato = String.valueOf(context.formParam("utgivelsesdato"));
         String bildeUrl = context.formParam("bildeUrl");
 
-        return new String[]{tvSerieNavn, episodeTittel, episodeBeskrivelse, episodeNummer, sesongNummer, spilletid, utgivelsesdato, bildeUrl};
+        return new String[] { tvSerieNavn, episodeTittel, episodeBeskrivelse, episodeNummer, sesongNummer, spilletid,
+                utgivelsesdato, bildeUrl };
     }
 
     private void sorterEpisoderEtterEpisodeNr(ArrayList<Episode> episodes) {
@@ -92,6 +102,5 @@ public class EpisodeController {
     private void sorterEpisoderEtterSpilletid(ArrayList<Episode> episodes) {
         episodes.sort(Comparator.comparing(Episode::getSpilletid));
     }
-
 
 }
