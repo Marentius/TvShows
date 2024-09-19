@@ -3,88 +3,84 @@ package com.marentius;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
-import io.javalin.vue.VueComponent;
 import com.marentius.controller.EpisodeController;
 import com.marentius.controller.TvSerieController;
 import com.marentius.repository.TvSerieJSONRepository;
 
-
-import java.io.File;
 import java.io.IOException;
-
 
 public class Application {
     public static void main(String[] args) throws IOException {
+        // Start Javalin server
         Javalin app = Javalin.create(config -> {
-            config.staticFiles.enableWebjars();
-            config.vue.vueAppName = "app";
-        }).start(1515);
+            config.staticFiles.enableWebjars(); // Aktiverer Webjars for frontend
+            // Legger til CORS-innstillinger for å tillate frontend forespørsler
+            config.plugins.enableCors(cors -> {
+                cors.add(it -> {
+                    it.allowHost("http://localhost:5173"); // Tillater forespørsler fra din frontend (Vite/React)
+                });
+            });
+        }).start(1515); // Backend kjører på port 1515
 
-        //app.get("/", new VueComponent("hello-world"));
-        app.before("/", context -> context.redirect("/tvserie"));
-
-        app.get("/tvserie", new VueComponent("tvserie-overview"));
-        app.get("/tvserie/{tvserie-id}/sesong/{sesong-nr}", new VueComponent("tvserie-detail"));
-        app.get("/tvserie/{tvserie-id}/sesong/{sesong-nr}/episode/{episode-nr}", new VueComponent("episode-detail"));
-        app.get("/tvserie/{tvserie-id}/sesong/{sesong-nr}/episode/{episode-nr}/updateepisode", new VueComponent("episode-update"));
-        app.get("/tvserie/{tvserie-id}/createepisode", new VueComponent("episode-create"));
-
-        //Jeg har jobbet i TvSerieJSONRepository for sletting, oppretting og oppdatering av episoder.
+        // Setter opp repository for å håndtere TV-seriedata
         TvSerieJSONRepository tvSerieRepository = new TvSerieJSONRepository("tvshows_10.json");
-        //TvSerieCSVRepository tvSerieRepository = new TvSerieCSVRepository(new File("tvshows_10.csv"));
-        //TvSerieDataRepository tvSerieRepository = new TvSerieDataRepository();
+
+        // Koble til kontrollerne
         TvSerieController tvSerieController = new TvSerieController(tvSerieRepository);
         EpisodeController episodeController = new EpisodeController(tvSerieRepository);
 
-        app.get("api/tvserie", new Handler() {
+        // API-endepunkter for TV-serier
+        app.get("/api/tvserie", new Handler() {
             @Override
             public void handle(Context context) {
-                tvSerieController.getTvSerier(context);
+                tvSerieController.getTvSerier(context); // Hent alle TV-serier
             }
         });
 
-        app.get("api/tvserie/{tvserie-id}", new Handler() {
+        app.get("/api/tvserie/{tvserie-id}", new Handler() {
             @Override
             public void handle(Context context) {
-                tvSerieController.getEnTvserie(context);
+                tvSerieController.getEnTvserie(context); // Hent en spesifikk TV-serie
             }
         });
 
+        // API-endepunkter for episoder
         app.get("/api/tvserie/{tvserie-id}/sesong/{sesong-nr}", new Handler() {
             @Override
             public void handle(Context context) {
-                episodeController.getEpisoderiSesong(context);
+                episodeController.getEpisoderiSesong(context); // Hent alle episoder i en sesong
             }
         });
 
         app.get("/api/tvserie/{tvserie-id}/sesong/{sesong-nr}/episode/{episode-nr}", new Handler() {
             @Override
             public void handle(Context context) {
-                episodeController.getEpisode(context);
+                episodeController.getEpisode(context); // Hent en spesifikk episode
             }
         });
 
-        app.get("/api/tvserie/{tvserie-id}/sesong/{sesong-nr}/episode/{episode-nr}/deleteepisode", new Handler() {
+        // API for å slette en episode
+        app.delete("/api/tvserie/{tvserie-id}/sesong/{sesong-nr}/episode/{episode-nr}/delete", new Handler() {
             @Override
             public void handle(Context context) {
-                episodeController.slettEpisode(context);
+                episodeController.slettEpisode(context); // Slett en spesifikk episode
             }
         });
 
+        // API for å opprette en ny episode
         app.post("/api/tvserie/{tvserie-id}/createepisode", new Handler() {
             @Override
             public void handle(Context context) {
-                episodeController.opprettEpisode(context);
+                episodeController.opprettEpisode(context); // Opprett en ny episode
             }
         });
 
-        app.post("/api/tvserie/{tvserie-id}/sesong/{sesong-nr}/episode/{episode-nr}/updateepisode", new Handler() {
+        // API for å oppdatere en eksisterende episode
+        app.put("/api/tvserie/{tvserie-id}/sesong/{sesong-nr}/episode/{episode-nr}/update", new Handler() {
             @Override
             public void handle(Context context) {
-                episodeController.oppdaterEpisode(context);
+                episodeController.oppdaterEpisode(context); // Oppdater en episode
             }
         });
-
     }
-
 }
