@@ -76,10 +76,10 @@ public class Application {
         });
 
         // API for å oppdatere en eksisterende episode
-        app.put("/api/tvserie/{tvserie-id}/sesong/{sesong-nr}/episode/{episode-nr}/update", new Handler() {
+        app.put("/api/tvserie/{tvserie-id}/sesong/{sesong-nr}/episode/{episode-nr}", new Handler() {
             @Override
             public void handle(Context context) {
-                episodeController.oppdaterEpisode(context); // Oppdater en episode
+                episodeController.oppdaterEpisode(context); // Oppdater en spesifikk episode
             }
         });
     }
